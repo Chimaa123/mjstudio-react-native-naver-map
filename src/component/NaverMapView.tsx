@@ -34,6 +34,7 @@ import type { CameraMoveBaseParams } from '../types/CameraMoveBaseParams';
 import type { CameraAnimationEasing } from '../types/CameraAnimationEasing';
 import type { ClusterMarkerProp } from '../types/ClusterMarkerProp';
 import hash from 'object-hash';
+import type { MarkerImageProp } from '../types/MarkerImageProp';
 
 /**
  * @category Hell
@@ -349,8 +350,17 @@ export interface NaverMapViewProps extends ViewProps {
    * 마커 클러스터링 기능을 이용하면 카메라의 줌 레벨에 따라 근접한 마커를 클러스터링해 성능과 시인성을 모두 향상시킬 수 있습니다.
    */
   clusters?: {
+    /**
+     * 클러스터 마커의 넓이
+     */
+    width?: number;
+    /**
+     * 클러스터 마커의 높이
+     */
+    height?: number;
     markers: ClusterMarkerProp[];
     screenDistance?: number;
+    image?: MarkerImageProp;
     /**
      * 클러스터링할 최소 줌 레벨.
      *
@@ -430,6 +440,13 @@ export interface NaverMapViewProps extends ViewProps {
    * @event
    */
   onTapMap?: (params: Coord & { x: number; y: number }) => void;
+
+  /**
+   * 클러스터 Leaf 마커를 클릭했을 때 발생하는 이벤트입니다.
+   *
+   * @event
+   */
+  onTapClusterLeaf?: (params: { markerIdentifier: string }) => void;
 }
 
 export interface NaverMapViewRef {
@@ -588,31 +605,46 @@ export const NaverMapView = forwardRef(
       locale,
       clusters,
       fpsLimit = 0,
+      onTapClusterLeaf,
 
       ...rest
     }: NaverMapViewProps,
     ref: ForwardedRef<NaverMapViewRef>
   ) => {
+    const isLeafTapCallbackExist: boolean = !!onTapClusterLeaf;
     const _clusters = useMemo<NativeClustersProp>(() => {
       if (!clusters || clusters.length === 0) {
-        return { key: '', clusters: [] };
+        return { key: '', clusters: [], isLeafTapCallbackExist };
       }
       let propKey = '';
       const ret: NativeClusterProp[] = [];
       for (const {
         animate = true,
         markers,
+        image,
         // eslint-disable-next-line @typescript-eslint/no-shadow
         minZoom = Const.MIN_ZOOM,
         // eslint-disable-next-line @typescript-eslint/no-shadow
         maxZoom = Const.MAX_ZOOM,
         screenDistance = Const.DEFAULT_SCREEN_DISTANCE,
+        width,
+        height,
       } of clusters) {
-        const key = hash([animate, maxZoom, minZoom, screenDistance, markers]);
+        const key = hash([
+          animate,
+          maxZoom,
+          minZoom,
+          image,
+          screenDistance,
+          markers,
+          width,
+          height,
+        ]);
 
         ret.push({
           key,
           animate,
+          image: convertJsImagePropToNativeProp(image ?? { symbol: 'green' }),
           markers: markers.map((m) => ({
             ...m,
             image: convertJsImagePropToNativeProp(
@@ -622,6 +654,8 @@ export const NaverMapView = forwardRef(
           maxZoom,
           minZoom,
           screenDistance,
+          width,
+          height,
         });
 
         propKey += `${key}---`;
@@ -630,8 +664,9 @@ export const NaverMapView = forwardRef(
       return {
         key: hash(propKey),
         clusters: ret,
+        isLeafTapCallbackExist,
       };
-    }, [clusters]);
+    }, [clusters, isLeafTapCallbackExist]);
 
     const innerRef = useRef<any>(null);
 
@@ -925,6 +960,12 @@ export const NaverMapView = forwardRef(
         onScreenToCoordinate={onScreenToCoordinate}
         onCoordinateToScreen={onCoordinateToScreen}
         fpsLimit={fpsLimit}
+        onTapClusterLeaf={
+          onTapClusterLeaf
+            ? ({ nativeEvent: { markerIdentifier } }) =>
+              onTapClusterLeaf({ markerIdentifier })
+            : undefined
+        }
         {...rest}
       />
     );
