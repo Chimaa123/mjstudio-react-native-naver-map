@@ -4,14 +4,14 @@ import com.facebook.drawee.view.DraweeHolder
 import com.facebook.react.bridge.ReactApplicationContext
 import com.mjstudio.reactnativenavermap.util.createDraweeHierarchy
 
-internal data class RNCNaverMapClustererHolder internal constructor(
+internal data class RNCNaverMapClusterDataHolder internal constructor(
   val context: ReactApplicationContext,
   val image: Map<*, *>? = null,
   val width: Double? = null,
   val height: Double? = null,
 )
 {
-  private val imageHolder: DraweeHolder<GenericDraweeHierarchy> by lazy {
+  val imageHolder: DraweeHolder<GenericDraweeHierarchy> by lazy {
     DraweeHolder.create(createDraweeHierarchy(context.resources), context).apply {
       onAttach()
     }

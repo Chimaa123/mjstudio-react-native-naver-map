@@ -13,13 +13,17 @@ import com.facebook.react.uimanager.ThemedReactContext
 import com.facebook.react.uimanager.annotations.ReactProp
 import com.mjstudio.reactnativenavermap.RNCNaverMapViewManagerSpec
 import com.mjstudio.reactnativenavermap.event.NaverMapCameraChangeEvent
+import com.mjstudio.reactnativenavermap.event.NaverMapCameraIdleEvent
+import com.mjstudio.reactnativenavermap.event.NaverMapClusterLeafTapEvent
 import com.mjstudio.reactnativenavermap.event.NaverMapCoordinateToScreenEvent
 import com.mjstudio.reactnativenavermap.event.NaverMapInitializeEvent
 import com.mjstudio.reactnativenavermap.event.NaverMapOptionChangeEvent
 import com.mjstudio.reactnativenavermap.event.NaverMapScreenToCoordinateEvent
 import com.mjstudio.reactnativenavermap.event.NaverMapTapEvent
+import com.mjstudio.reactnativenavermap.overlay.marker.cluster.RNCNaverMapClusterDataHolder
 import com.mjstudio.reactnativenavermap.overlay.marker.cluster.RNCNaverMapClusterKey
-import com.mjstudio.reactnativenavermap.overlay.marker.cluster.RNCNaverMapClustererHolder
+import com.mjstudio.reactnativenavermap.overlay.marker.cluster.RNCNaverMapClusterMarkerUpdater
+import com.mjstudio.reactnativenavermap.overlay.marker.cluster.RNCNaverMapLeafDataHolder
 import com.mjstudio.reactnativenavermap.overlay.marker.cluster.RNCNaverMapLeafMarkerHolder
 import com.mjstudio.reactnativenavermap.overlay.marker.cluster.RNCNaverMapLeafMarkerUpdater
 import com.mjstudio.reactnativenavermap.util.CameraAnimationUtil
@@ -27,6 +31,7 @@ import com.mjstudio.reactnativenavermap.util.RectUtil
 import com.mjstudio.reactnativenavermap.util.dp
 import com.mjstudio.reactnativenavermap.util.emitEvent
 import com.mjstudio.reactnativenavermap.util.getDoubleOrNull
+import com.mjstudio.reactnativenavermap.util.getIntOrNull
 import com.mjstudio.reactnativenavermap.util.getLatLng
 import com.mjstudio.reactnativenavermap.util.getLatLngBoundsOrNull
 import com.mjstudio.reactnativenavermap.util.isValidNumber
@@ -58,9 +63,7 @@ import kotlin.math.max
 import kotlin.math.min
 
 class RNCNaverMapViewManager : RNCNaverMapViewManagerSpec<RNCNaverMapViewWrapper>() {
-  override fun getName(): String {
-    return NAME
-  }
+  override fun getName(): String = NAME
 
   private var initialMapOptions: NaverMapOptions? = null
   private var animationDuration = 0
@@ -68,7 +71,7 @@ class RNCNaverMapViewManager : RNCNaverMapViewManagerSpec<RNCNaverMapViewWrapper
   private var isFirstCameraMoving = true
   private var lastClustersPropKey = "NOT_SET"
 
-  private val clustererHolders = mutableMapOf<String, RNCNaverMapClustererHolder>()
+  private val clustererHolders = mutableMapOf<String, RNCNaverMapLeafDataHolder>()
 
   private lateinit var reactAppContext: ReactApplicationContext
 
@@ -96,16 +99,18 @@ class RNCNaverMapViewManager : RNCNaverMapViewManagerSpec<RNCNaverMapViewWrapper
     return super.createViewInstance(reactTag, reactContext, initialProps, stateWrapper)
   }
 
-  override fun createViewInstance(reactContext: ThemedReactContext): RNCNaverMapViewWrapper {
-    return RNCNaverMapViewWrapper(reactContext, initialMapOptions ?: NaverMapOptions()).also {
+  override fun createViewInstance(reactContext: ThemedReactContext): RNCNaverMapViewWrapper =
+    RNCNaverMapViewWrapper(reactContext, initialMapOptions ?: NaverMapOptions()).also {
       reactContext.addLifecycleEventListener(it)
     }
-  }
 
   override fun onDropViewInstance(view: RNCNaverMapViewWrapper) {
     view.onDropViewInstance()
     view.reactContext.removeLifecycleEventListener(view)
     clustererHolders.forEach { (_, u) -> u.onDetach() }
+    clustererHolders.clear()
+    lastClustersPropKey = "NOT_SET"
+    isFirstCameraMoving = true
     super.onDropViewInstance(view)
   }
 
@@ -114,9 +119,11 @@ class RNCNaverMapViewManager : RNCNaverMapViewManagerSpec<RNCNaverMapViewWrapper
       registerDirectEvent(this, NaverMapInitializeEvent.EVENT_NAME)
       registerDirectEvent(this, NaverMapOptionChangeEvent.EVENT_NAME)
       registerDirectEvent(this, NaverMapCameraChangeEvent.EVENT_NAME)
+      registerDirectEvent(this, NaverMapCameraIdleEvent.EVENT_NAME)
       registerDirectEvent(this, NaverMapTapEvent.EVENT_NAME)
       registerDirectEvent(this, NaverMapScreenToCoordinateEvent.EVENT_NAME)
       registerDirectEvent(this, NaverMapCoordinateToScreenEvent.EVENT_NAME)
+      registerDirectEvent(this, NaverMapClusterLeafTapEvent.EVENT_NAME)
     }
 
   private fun RNCNaverMapViewWrapper?.withMapView(callback: (mapView: RNCNaverMapView) -> Unit) {
@@ -130,29 +137,27 @@ class RNCNaverMapViewManager : RNCNaverMapViewManagerSpec<RNCNaverMapViewWrapper
   override fun needsCustomLayoutForChildren(): Boolean = true
 
   override fun addView(
-    parent: RNCNaverMapViewWrapper,
+    parent: RNCNaverMapViewWrapper?,
     child: View,
     index: Int,
   ) {
-    parent.withMapView {
+    parent?.withMapView {
       it.addOverlay(child, index)
     }
   }
 
-  override fun getChildCount(parent: RNCNaverMapViewWrapper): Int {
-    return parent.mapView?.overlays?.size ?: 0
-  }
+  override fun getChildCount(parent: RNCNaverMapViewWrapper): Int = parent.mapView?.overlays?.size ?: 0
 
   override fun getChildAt(
-    parent: RNCNaverMapViewWrapper,
+    parent: RNCNaverMapViewWrapper?,
     index: Int,
-  ): View? = parent.mapView?.overlays?.get(index)
+  ): View? = parent?.mapView?.overlays?.get(index)
 
   override fun removeViewAt(
-    parent: RNCNaverMapViewWrapper,
+    parent: RNCNaverMapViewWrapper?,
     index: Int,
   ) {
-    parent.withMapView {
+    parent?.withMapView {
       it.removeOverlay(index)
     }
   }
@@ -245,7 +250,8 @@ class RNCNaverMapViewManager : RNCNaverMapViewManagerSpec<RNCNaverMapViewWrapper
       val bearing = value.getDoubleOrNull("bearing") ?: it.cameraPosition.bearing
 
       it.moveCamera(
-        CameraUpdate.toCameraPosition(
+        CameraUpdate
+        .toCameraPosition(
           CameraPosition(
             latlng,
             zoom,
@@ -431,7 +437,9 @@ class RNCNaverMapViewManager : RNCNaverMapViewManagerSpec<RNCNaverMapViewWrapper
     view: RNCNaverMapViewWrapper?,
     value: Boolean,
   ) = view.withMapView {
-    it.setupLocationSource()
+    if (value) {
+      it.setupLocationSource()
+    }
     it.withMap { map ->
       map.uiSettings.isLocationButtonEnabled = value
     }
@@ -551,20 +559,24 @@ class RNCNaverMapViewManager : RNCNaverMapViewManagerSpec<RNCNaverMapViewWrapper
       val markers = (it["markers"] as? ArrayList<*>)?.filterIsInstance<Map<String, *>>() ?: listOf()
 
       val clusterer =
-        Clusterer.Builder<RNCNaverMapClusterKey>().also { cluster ->
-          if (screenDistance != null) {
-            cluster.screenDistance(screenDistance)
-          }
-          if (minZoom != null) {
-            cluster.minZoom(max(minZoom.toInt(), 1))
-          }
-          if (maxZoom != null) {
-            cluster.maxZoom(min(maxZoom.toInt(), 20))
-          }
-          if (animate != null) {
-            cluster.animate(animate)
-          }
-        }.leafMarkerUpdater(RNCNaverMapLeafMarkerUpdater()).build()
+        Clusterer
+          .Builder<RNCNaverMapClusterKey>()
+          .clusterMarkerUpdater(RNCNaverMapClusterMarkerUpdater(RNCNaverMapClusterDataHolder(clusterWidth, clusterHeight)))
+          .leafMarkerUpdater(RNCNaverMapLeafMarkerUpdater())
+          .also { cluster ->
+            if (screenDistance != null) {
+              cluster.screenDistance(screenDistance)
+            }
+            if (minZoom != null) {
+              cluster.minZoom(max(minZoom.toInt(), 1))
+            }
+            if (maxZoom != null) {
+              cluster.maxZoom(min(maxZoom.toInt(), 20))
+            }
+            if (animate != null) {
+              cluster.animate(animate)
+            }
+          }.build()
 
       val keyPairs =
         markers.associate { marker ->
@@ -576,19 +588,37 @@ class RNCNaverMapViewManager : RNCNaverMapViewManagerSpec<RNCNaverMapViewWrapper
           val height = marker["height"] as? Double
 
           RNCNaverMapClusterKey(
-            identifier,
-            LatLng(latitude, longitude),
-            image,
-            width,
-            height,
-            RNCNaverMapLeafMarkerHolder(identifier, reactAppContext),
+            RNCNaverMapLeafMarkerHolder(
+              identifier,
+              latlng = LatLng(latitude, longitude),
+              context = reactAppContext,
+              image,
+              width,
+              height,
+              onTapLeaf =
+                if (isLeafTapCallbackExist) {
+                  {
+                    view?.let { wrapper ->
+                      wrapper.reactContext.emitEvent(wrapper.id) { surfaceId, reactTag ->
+                        NaverMapClusterLeafTapEvent(
+                          surfaceId,
+                          reactTag,
+                          identifier,
+                        )
+                      }
+                    }
+                  }
+                } else {
+                  null
+                },
+            ),
           ) to null
         }
 
       clusterer.addAll(keyPairs)
       clusterer.map = map
       clustererHolders[clustererKey!!] =
-        RNCNaverMapClustererHolder(
+        RNCNaverMapLeafDataHolder(
           clustererKey,
           clusterer,
           reactAppContext,
@@ -712,7 +742,8 @@ class RNCNaverMapViewManager : RNCNaverMapViewManagerSpec<RNCNaverMapViewWrapper
     pivotX: Double,
     pivotY: Double,
   ) = view.withMap {
-    CameraUpdate.fitBounds(
+    CameraUpdate
+    .fitBounds(
       LatLngBounds(
         LatLng(latitude, longitude),
         LatLng(latitude + latitudeDelta, longitude + longitudeDelta),
