@@ -50,7 +50,7 @@ export type NativeClusterProp = {
   width?: Double;
   height?: Double;
   markers: ClusterMarker[];
-  image?: NativeImageProp;
+  image?: Readonly<NativeImageProp>;
   screenDistance?: Double;
   minZoom?: Double;
   maxZoom?: Double;
@@ -59,6 +59,7 @@ export type NativeClusterProp = {
 export type NativeClustersProp = Readonly<{
   key: string;
   clusters: ReadonlyArray<NativeClusterProp>;
+  isLeafTapCallbackExist: boolean;
 }>;
 
 ////////////////////
@@ -150,6 +151,7 @@ interface Props extends ViewProps {
       y: Double;
     }>
   >;
+  onTapClusterLeaf?: DirectEventHandler<Readonly<{ markerIdentifier: string }>>;
 
   onScreenToCoordinate?: DirectEventHandler<
     Readonly<{ isValid: boolean; latitude: Double; longitude: Double }>
