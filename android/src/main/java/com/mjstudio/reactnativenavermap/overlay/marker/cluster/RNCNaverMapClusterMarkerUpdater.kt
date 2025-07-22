@@ -1,6 +1,6 @@
 package com.mjstudio.reactnativenavermap.overlay.marker.cluster
 
-import com.mjstudio.reactnativenavermap.util.getOverlayImage
+import com.mjstudio.reactnativenavermap.util.image.getOverlayImage
 import com.mjstudio.reactnativenavermap.util.px
 import com.naver.maps.map.clustering.ClusterMarkerInfo
 import com.naver.maps.map.clustering.DefaultClusterMarkerUpdater
