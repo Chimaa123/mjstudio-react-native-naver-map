@@ -48,15 +48,15 @@ internal class RNCNaverMapLeafMarkerUpdater : DefaultLeafMarkerUpdater() {
   }
 
   fun setCaption(marker: Marker, caption: Map<*, *>) = with(marker) {
-      setCaptionText(caption["text"] as? String ?: "")
-      setCaptionRequestedWidth((caption["requestedWidth"] as? Double ?: 0.0).px)
-      setCaptionAligns(caption["align"] as? Align ?: Align.Center)
-      setCaptionOffset((caption["offset"] as? Double ?: 0.0).px)
-      setCaptionColor(caption["color"] as? Int ?: Color.WHITE)
-      setCaptionHaloColor(caption["haloColor"] as? Int ?: Color.TRANSPARENT)
-      setCaptionTextSize((caption["textSize"] as? Double ?: 12.0).toFloat())
-      setCaptionMinZoom(caption["minZoom"] as? Double ?: 0.0)
-      setCaptionMaxZoom(caption["maxZoom"] as? Double ?: 21.0)
+      marker.setCaptionText(caption["text"] as? String ?: "")
+      marker.setCaptionRequestedWidth((caption["requestedWidth"] as? Double ?: 0.0).px)
+      marker.setCaptionAligns(caption["align"] as? Align ?: Align.Center)
+      marker.setCaptionOffset((caption["offset"] as? Double ?: 0.0).px)
+      marker.setCaptionColor(caption["color"] as? Int ?: Color.WHITE)
+      marker.setCaptionHaloColor(caption["haloColor"] as? Int ?: Color.TRANSPARENT)
+      marker.setCaptionTextSize((caption["textSize"] as? Double ?: 12.0).toFloat())
+      marker.setCaptionMinZoom(caption["minZoom"] as? Double ?: 0.0)
+      marker.setCaptionMaxZoom(caption["maxZoom"] as? Double ?: 21.0)
   }
 
 }
