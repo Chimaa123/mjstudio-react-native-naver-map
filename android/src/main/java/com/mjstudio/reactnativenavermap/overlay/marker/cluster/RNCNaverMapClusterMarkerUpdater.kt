@@ -1,10 +1,12 @@
 package com.mjstudio.reactnativenavermap.overlay.marker.cluster
 
+import android.util.Log
 import com.mjstudio.reactnativenavermap.util.image.getOverlayImage
 import com.mjstudio.reactnativenavermap.util.px
 import com.naver.maps.map.clustering.ClusterMarkerInfo
 import com.naver.maps.map.clustering.DefaultClusterMarkerUpdater
 import com.naver.maps.map.overlay.Marker
+import com.naver.maps.map.overlay.Overlay
 import com.naver.maps.map.overlay.Marker.SIZE_AUTO
 import com.naver.maps.map.util.MarkerIcons
 
@@ -27,6 +29,15 @@ internal class RNCNaverMapClusterMarkerUpdater(
       }
     } else {
       marker.alpha = 1f
+    }
+    marker.setOnClickListener {
+      val identifierList = info.tag as String
+      Log.d("clusterzzz tag", info.tag as String)
+      if (holder.onTapCluster == null) {
+        return@setOnClickListener false
+      }
+      holder.onTapCluster.invoke(identifierList)
+      true
     }
   }
 }

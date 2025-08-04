@@ -9,6 +9,7 @@ internal data class RNCNaverMapClusterDataHolder internal constructor(
   val image: Map<*, *>? = null,
   val width: Double? = null,
   val height: Double? = null,
+  val onTapCluster: ((identifierList: String) -> Unit)?,
 )
 {
   val imageHolder: DraweeHolder<GenericDraweeHierarchy> by lazy {

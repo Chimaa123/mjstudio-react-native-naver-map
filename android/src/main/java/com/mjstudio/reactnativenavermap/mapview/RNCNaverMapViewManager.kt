@@ -1,5 +1,6 @@
 package com.mjstudio.reactnativenavermap.mapview
 
+import android.util.Log
 import android.graphics.PointF
 import android.view.Gravity
 import android.view.View
@@ -13,6 +14,7 @@ import com.facebook.react.uimanager.ThemedReactContext
 import com.facebook.react.uimanager.annotations.ReactProp
 import com.mjstudio.reactnativenavermap.RNCNaverMapViewManagerSpec
 import com.mjstudio.reactnativenavermap.event.NaverMapCameraChangeEvent
+import com.mjstudio.reactnativenavermap.event.NaverMapClusterTapEvent
 import com.mjstudio.reactnativenavermap.event.NaverMapClusterLeafTapEvent
 import com.mjstudio.reactnativenavermap.event.NaverMapCoordinateToScreenEvent
 import com.mjstudio.reactnativenavermap.event.NaverMapInitializeEvent
@@ -122,6 +124,7 @@ class RNCNaverMapViewManager : RNCNaverMapViewManagerSpec<RNCNaverMapViewWrapper
       registerDirectEvent(this, NaverMapScreenToCoordinateEvent.EVENT_NAME)
       registerDirectEvent(this, NaverMapCoordinateToScreenEvent.EVENT_NAME)
       registerDirectEvent(this, NaverMapClusterLeafTapEvent.EVENT_NAME)
+      registerDirectEvent(this, NaverMapClusterTapEvent.EVENT_NAME)
     }
 
   private fun RNCNaverMapViewWrapper?.withMapView(callback: (mapView: RNCNaverMapView) -> Unit) {
@@ -563,22 +566,27 @@ class RNCNaverMapViewManager : RNCNaverMapViewManagerSpec<RNCNaverMapViewWrapper
 
       val clusterer =
         Clusterer
-          .Builder<RNCNaverMapClusterKey>()
-          .clusterMarkerUpdater(RNCNaverMapClusterMarkerUpdater(RNCNaverMapClusterDataHolder(context = reactAppContext, image, clusterWidth, clusterHeight)))
+          .ComplexBuilder<RNCNaverMapClusterKey>()
+          .clusterMarkerUpdater(RNCNaverMapClusterMarkerUpdater(RNCNaverMapClusterDataHolder(context = reactAppContext, image, clusterWidth, clusterHeight,
+            onTapCluster =
+              if (isLeafTapCallbackExist) {
+                { identifierList: String ->
+                  view?.let { wrapper ->
+                    wrapper.reactContext.emitEvent(wrapper.id) { surfaceId, reactTag ->
+                      NaverMapClusterTapEvent(
+                        surfaceId,
+                        reactTag,
+                        identifierList,
+                      )
+                    }
+                  }
+                }
+              } else {
+                null
+              },)))
           .leafMarkerUpdater(RNCNaverMapLeafMarkerUpdater())
-          .also { cluster ->
-            if (screenDistance != null) {
-              cluster.screenDistance(screenDistance)
-            }
-            if (minZoom != null) {
-              cluster.minZoom(max(minZoom.toInt(), 1))
-            }
-            if (maxZoom != null) {
-              cluster.maxZoom(min(maxZoom.toInt(), 20))
-            }
-            if (animate != null) {
-              cluster.animate(animate)
-            }
+          .tagMergeStrategy { cluster ->
+            cluster.children.map { it.tag }.joinToString(",")
           }.build()
 
       val keyPairs =
@@ -617,9 +625,8 @@ class RNCNaverMapViewManager : RNCNaverMapViewManagerSpec<RNCNaverMapViewWrapper
                   null
                 },
             ),
-          ) to null
+          ) to identifier
         }
-
       clusterer.addAll(keyPairs)
       clusterer.map = map
       clustererHolders[clustererKey!!] =

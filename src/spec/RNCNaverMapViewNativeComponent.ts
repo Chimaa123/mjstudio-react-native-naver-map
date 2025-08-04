@@ -164,6 +164,7 @@ interface Props extends ViewProps {
     }>
   >;
   onTapClusterLeaf?: DirectEventHandler<Readonly<{ markerIdentifier: string }>>;
+  onTapCluster?: DirectEventHandler<Readonly<{ identifierList: string }>>;
 
   onScreenToCoordinate?: DirectEventHandler<
     Readonly<{ isValid: boolean; latitude: Double; longitude: Double }>

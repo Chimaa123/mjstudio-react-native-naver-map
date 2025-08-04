@@ -447,6 +447,12 @@ export interface NaverMapViewProps extends ViewProps {
    * @event
    */
   onTapClusterLeaf?: (params: { markerIdentifier: string }) => void;
+  /**
+   * 클러스터 마커를 클릭했을 때 발생하는 이벤트입니다.
+   *
+   * @event
+   */
+  onTapCluster?: (params: { identifierList: string }) => void;
 }
 
 export interface NaverMapViewRef {
@@ -606,6 +612,7 @@ export const NaverMapView = forwardRef(
       clusters,
       fpsLimit = 0,
       onTapClusterLeaf,
+      onTapCluster,
 
       ...rest
     }: NaverMapViewProps,
@@ -964,6 +971,12 @@ export const NaverMapView = forwardRef(
           onTapClusterLeaf
             ? ({ nativeEvent: { markerIdentifier } }) =>
               onTapClusterLeaf({ markerIdentifier })
+            : undefined
+        }
+        onTapCluster={
+          onTapCluster
+            ? ({ nativeEvent: { identifierList } }) =>
+              onTapCluster({ identifierList })
             : undefined
         }
         {...rest}
