@@ -37,6 +37,20 @@
     marker.height = key.height;
   }
 
+  auto caption = key.caption;
+  if (caption[@"text"]) {
+
+      marker.captionText = caption[@"text"];
+    marker.captionRequestedWidth = [caption[@"requestedWidth"] floatValue];
+    marker.captionAligns = @[ [RCTConvert NMFAlignType:caption[@"align"]] ];
+    marker.captionOffset = [caption[@"offset"] floatValue];
+    marker.captionColor = [Utils intToColor:[caption[@"color"] intValue]];
+    marker.captionHaloColor = [Utils intToColor:[caption[@"haloColor"] intValue]];
+    marker.captionTextSize = [caption[@"textSize"] floatValue];
+    marker.captionMinZoom = [caption[@"minZoom"] doubleValue];
+    marker.captionMaxZoom = [caption[@"maxZoom"] doubleValue];
+  }
+
   if (key.bridge) {
     marker.alpha = 0;
     if (_markerImageRequestCanceler[identifier]) {

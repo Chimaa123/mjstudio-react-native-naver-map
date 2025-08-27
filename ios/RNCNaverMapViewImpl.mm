@@ -364,13 +364,15 @@ NMAP_MAP_SETTER(L, l, ocale, NSString*)
     double width = [marker[@"width"] doubleValue];
     double height = [marker[@"height"] doubleValue];
     NSDictionary* image = marker[@"image"];
+    NSDictionary* caption = marker[@"caption"];
     RNCNaverMapClusterKey* markerKey =
         [RNCNaverMapClusterKey markerKeyWithIdentifier:identifier
                                               position:NMGLatLngMake(latitude, longitude)
                                                 bridge:[self bridge]
                                                  image:image
                                                  width:width
-                                                height:height];
+                                                height:height
+                                                caption:caption];
     markerDict[markerKey] = [NSNull null];
 
     [markerIdentifiers addObject:identifier];

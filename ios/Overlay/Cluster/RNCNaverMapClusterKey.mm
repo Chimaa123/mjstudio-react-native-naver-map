@@ -14,7 +14,8 @@
                                  bridge:(RCTBridge*)bridge
                                   image:(NSDictionary*)image
                                   width:(double)width
-                                 height:(double)height {
+                                  height:(double)height
+                                  caption:(NSDictionary*)caption {
   return [[RNCNaverMapClusterKey alloc] initWithIdentifier:identifier
                                                   position:position
                                                     bridge:bridge
@@ -28,7 +29,8 @@
                             bridge:(RCTBridge*)bridge
                              image:(nonnull NSDictionary*)image
                              width:(double)width
-                            height:(double)height {
+                            height:(double)height
+                           caption:(nonnull NSDictionary*)caption {
   if (self = [super init]) {
     _identifier = identifier;
     _position = position;
@@ -36,6 +38,7 @@
     _image = image;
     _width = width;
     _height = height;
+    _caption = caption;
   }
 
   return self;
@@ -64,7 +67,8 @@
                                            bridge:self.bridge
                                             image:[self.image copy]
                                             width:self.width
-                                           height:self.height];
+                                           height:self.height
+                                          caption:self.caption];
 }
 
 @end

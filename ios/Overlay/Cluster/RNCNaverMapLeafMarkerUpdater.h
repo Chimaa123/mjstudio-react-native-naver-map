@@ -8,6 +8,7 @@
 #import "FnUtil.h"
 #import "RNCNaverMapClusterKey.h"
 #import "Utils.h"
+#import "RCTConvert+NMFMapView.h"
 #import <Foundation/Foundation.h>
 #import <NMapsMap/NMapsMap.h>
 

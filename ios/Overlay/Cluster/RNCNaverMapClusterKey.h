@@ -20,13 +20,15 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic, strong) NSDictionary* image;
 @property(nonatomic, assign) double width;
 @property(nonatomic, assign) double height;
+@property(nonatomic, strong) NSDictionary* caption;
 
 + (instancetype)markerKeyWithIdentifier:(nonnull NSString*)identifier
                                position:(nonnull NMGLatLng*)position
                                  bridge:(RCTBridge*)bridge
                                   image:(nonnull NSDictionary*)image
                                   width:(double)width
-                                 height:(double)height;
+                                 height:(double)height
+                                caption:(nonnull NSDictionary*)caption;
 
 @end
 
