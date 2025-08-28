@@ -43,8 +43,8 @@
     marker.captionRequestedWidth = [caption[@"requestedWidth"] floatValue];
     marker.captionAligns = @[ [RCTConvert NMFAlignType:caption[@"align"]] ];
     marker.captionOffset = [caption[@"offset"] floatValue];
-    marker.captionColor = [Utils intToColor:[caption[@"color"] intValue]];
-    marker.captionHaloColor = [Utils intToColor:[caption[@"haloColor"] intValue]];
+    marker.captionColor = [Utils hexToColor: caption[@"color"]];
+    marker.captionHaloColor = [Utils hexToColor:caption[@"haloColor"]];
     marker.captionTextSize = [caption[@"textSize"] floatValue];
     marker.captionMinZoom = [caption[@"minZoom"] doubleValue];
     marker.captionMaxZoom = [caption[@"maxZoom"] doubleValue];
