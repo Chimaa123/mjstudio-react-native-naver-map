@@ -69,7 +69,7 @@
                                             image:[self.image copy]
                                             width:self.width
                                            height:self.height
-                                          caption:self.caption copy];
+                                          caption:self.caption];
 }
 
 @end
