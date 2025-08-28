@@ -39,8 +39,7 @@
 
   auto caption = key.caption;
   if (caption[@"text"]) {
-
-      marker.captionText = caption[@"text"];
+    marker.captionText = caption[@"text"];
     marker.captionRequestedWidth = [caption[@"requestedWidth"] floatValue];
     marker.captionAligns = @[ [RCTConvert NMFAlignType:caption[@"align"]] ];
     marker.captionOffset = [caption[@"offset"] floatValue];

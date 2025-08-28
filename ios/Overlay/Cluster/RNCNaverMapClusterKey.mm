@@ -21,7 +21,8 @@
                                                     bridge:bridge
                                                      image:image
                                                      width:width
-                                                    height:height];
+                                                    height:height
+                                                    caption:caption];
 }
 
 - (instancetype)initWithIdentifier:(nonnull NSString*)identifier
@@ -68,7 +69,7 @@
                                             image:[self.image copy]
                                             width:self.width
                                            height:self.height
-                                          caption:self.caption];
+                                          caption:self.caption copy];
 }
 
 @end
