@@ -349,6 +349,9 @@ NMAP_MAP_SETTER(L, l, ocale, NSString*)
   //  double screenDistance = clamp([dict[@"screenDistance"] doubleValue], 1, 69);
   double minZoom = clamp([dict[@"minZoom"] doubleValue], 1, 20);
   double maxZoom = clamp([dict[@"maxZoom"] doubleValue], 1, 20);
+  double width = [dict[@"width"] doubleValue];
+  double height = [dict[@"height"] doubleValue];
+  NSDictionary* image = dict[@"image"];
   BOOL animate = [dict[@"animate"] boolValue];
   NSDictionary* markers = dict[@"markers"];
 
@@ -385,11 +388,11 @@ NMAP_MAP_SETTER(L, l, ocale, NSString*)
   builder.maxZoom = maxZoom;
   builder.animate = animate;
 
-  //  RNCNaverMapClusterMarkerUpdater* clusterMarkerUpdater =
-  //      [[RNCNaverMapClusterMarkerUpdater alloc] init];
+  RNCNaverMapClusterMarkerUpdater* clusterMarkerUpdater =
+  [[RNCNaverMapClusterMarkerUpdater alloc] initWith:width height:height image: image];
   RNCNaverMapLeafMarkerUpdater* leafMarkerUpdater =
       [[RNCNaverMapLeafMarkerUpdater alloc] init:_clusterMarkerImageRequestCancelers];
-  //  builder.clusterMarkerUpdater = clusterMarkerUpdater;
+  builder.clusterMarkerUpdater = clusterMarkerUpdater;
   builder.leafMarkerUpdater = leafMarkerUpdater;
 
   NMCClusterer* clusterer = [builder build];
