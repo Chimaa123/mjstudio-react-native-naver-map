@@ -30,14 +30,5 @@ internal class RNCNaverMapClusterMarkerUpdater(
     } else {
       marker.alpha = 1f
     }
-    marker.setOnClickListener {
-      val identifierList = info.tag as String
-      Log.d("clusterzzz tag", info.tag as String)
-      if (holder.onTapCluster == null) {
-        return@setOnClickListener false
-      }
-      holder.onTapCluster.invoke(identifierList)
-      true
-    }
   }
 }

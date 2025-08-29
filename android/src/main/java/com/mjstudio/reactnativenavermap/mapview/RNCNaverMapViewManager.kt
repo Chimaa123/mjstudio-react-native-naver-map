@@ -14,7 +14,6 @@ import com.facebook.react.uimanager.ThemedReactContext
 import com.facebook.react.uimanager.annotations.ReactProp
 import com.mjstudio.reactnativenavermap.RNCNaverMapViewManagerSpec
 import com.mjstudio.reactnativenavermap.event.NaverMapCameraChangeEvent
-import com.mjstudio.reactnativenavermap.event.NaverMapClusterTapEvent
 import com.mjstudio.reactnativenavermap.event.NaverMapClusterLeafTapEvent
 import com.mjstudio.reactnativenavermap.event.NaverMapCoordinateToScreenEvent
 import com.mjstudio.reactnativenavermap.event.NaverMapInitializeEvent
@@ -124,7 +123,6 @@ class RNCNaverMapViewManager : RNCNaverMapViewManagerSpec<RNCNaverMapViewWrapper
       registerDirectEvent(this, NaverMapScreenToCoordinateEvent.EVENT_NAME)
       registerDirectEvent(this, NaverMapCoordinateToScreenEvent.EVENT_NAME)
       registerDirectEvent(this, NaverMapClusterLeafTapEvent.EVENT_NAME)
-      registerDirectEvent(this, NaverMapClusterTapEvent.EVENT_NAME)
     }
 
   private fun RNCNaverMapViewWrapper?.withMapView(callback: (mapView: RNCNaverMapView) -> Unit) {
@@ -567,23 +565,7 @@ class RNCNaverMapViewManager : RNCNaverMapViewManagerSpec<RNCNaverMapViewWrapper
       val clusterer =
         Clusterer
           .ComplexBuilder<RNCNaverMapClusterKey>()
-          .clusterMarkerUpdater(RNCNaverMapClusterMarkerUpdater(RNCNaverMapClusterDataHolder(context = reactAppContext, image, clusterWidth, clusterHeight,
-            onTapCluster =
-              if (isLeafTapCallbackExist) {
-                { identifierList: String ->
-                  view?.let { wrapper ->
-                    wrapper.reactContext.emitEvent(wrapper.id) { surfaceId, reactTag ->
-                      NaverMapClusterTapEvent(
-                        surfaceId,
-                        reactTag,
-                        identifierList,
-                      )
-                    }
-                  }
-                }
-              } else {
-                null
-              },)))
+          .clusterMarkerUpdater(RNCNaverMapClusterMarkerUpdater(RNCNaverMapClusterDataHolder(context = reactAppContext, image, clusterWidth, clusterHeight)))
           .leafMarkerUpdater(RNCNaverMapLeafMarkerUpdater())
           .tagMergeStrategy { cluster ->
             cluster.children.map { it.tag }.joinToString(",")
