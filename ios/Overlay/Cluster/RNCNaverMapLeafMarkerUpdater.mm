@@ -69,6 +69,13 @@
                  });
                }];
   }
+  [marker setTouchHandler:^BOOL(NMFOverlay* __weak overlay) {
+    if (key.onTapLeafMarker) {
+      key.onTapLeafMarker();
+      return YES;
+    }
+  return NO;
+  }];
 }
 #pragma clang diagnostic pop
 

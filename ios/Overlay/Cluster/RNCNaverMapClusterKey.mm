@@ -15,14 +15,16 @@
                                   image:(NSDictionary*)image
                                   width:(double)width
                                   height:(double)height
-                                  caption:(NSDictionary*)caption {
+                                  caption:(NSDictionary*)caption
+                                  onTapLeafMarker:(OnTapLeafMarker _Nullable)onTapLeafMarker {
   return [[RNCNaverMapClusterKey alloc] initWithIdentifier:identifier
                                                   position:position
                                                     bridge:bridge
                                                      image:image
                                                      width:width
                                                     height:height
-                                                    caption:caption];
+                                                    caption:caption
+                                                    onTapLeafMarker:onTapLeafMarker];
 }
 
 - (instancetype)initWithIdentifier:(nonnull NSString*)identifier
@@ -31,7 +33,8 @@
                              image:(nonnull NSDictionary*)image
                              width:(double)width
                             height:(double)height
-                           caption:(nonnull NSDictionary*)caption {
+                            caption:(nonnull NSDictionary*)caption
+                            onTapLeafMarker:(OnTapLeafMarker)onTapLeafMarker {
   if (self = [super init]) {
     _identifier = identifier;
     _position = position;
@@ -40,6 +43,7 @@
     _width = width;
     _height = height;
     _caption = caption;
+    _onTapLeafMarker = onTapLeafMarker;
   }
 
   return self;
@@ -69,7 +73,8 @@
                                             image:[self.image copy]
                                             width:self.width
                                            height:self.height
-                                          caption:self.caption];
+                                          caption:self.caption
+                                          onTapLeafMarker:self.onTapLeafMarker];
 }
 
 @end

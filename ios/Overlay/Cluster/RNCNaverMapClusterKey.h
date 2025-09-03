@@ -10,6 +10,8 @@
 #import <NMapsMap/NMapsMap.h>
 #import <React/RCTBridge.h>
 
+typedef void (^OnTapLeafMarker)();
+
 NS_ASSUME_NONNULL_BEGIN
 
 @interface RNCNaverMapClusterKey : NSObject <NMCClusteringKey>
@@ -21,6 +23,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic, assign) double width;
 @property(nonatomic, assign) double height;
 @property(nonatomic, strong) NSDictionary* caption;
+@property(nonatomic, nullable) OnTapLeafMarker onTapLeafMarker;
 
 + (instancetype)markerKeyWithIdentifier:(nonnull NSString*)identifier
                                position:(nonnull NMGLatLng*)position
@@ -28,7 +31,8 @@ NS_ASSUME_NONNULL_BEGIN
                                   image:(nonnull NSDictionary*)image
                                   width:(double)width
                                  height:(double)height
-                                caption:(nonnull NSDictionary*)caption;
+                                caption:(nonnull NSDictionary*)caption
+                        onTapLeafMarker:(OnTapLeafMarker _Nullable)onTapLeafMarker;
 
 @end
 

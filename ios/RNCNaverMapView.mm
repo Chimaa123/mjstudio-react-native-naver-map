@@ -80,6 +80,17 @@ using namespace facebook::react;
       });
     };
 
+    _view.onTapClusterLeaf = [self](NSDictionary* dict) {
+      if (_eventEmitter == nil) {
+        return;
+      }
+
+      auto emitter = std::static_pointer_cast<RNCNaverMapViewEventEmitter const>(_eventEmitter);
+      emitter->onTapClusterLeaf({
+        .markerIdentifier = dict[@"markerIdentifier"]
+      });
+    };
+
     _view.onScreenToCoordinate = [self](NSDictionary* dict) {
       if (_eventEmitter == nil) {
         return;
