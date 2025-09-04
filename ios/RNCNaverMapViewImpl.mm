@@ -362,6 +362,14 @@ NMAP_MAP_SETTER(L, l, ocale, NSString*)
 
   for (NSDictionary* marker : markers) {
     NSString* identifier = marker[@"identifier"];
+
+    OnTapLeafMarker _Nullable onTapLeafMarker;
+    onTapLeafMarker = ^{
+      if (self.onTapClusterLeaf) {
+        self.onTapClusterLeaf(@{ @"markerIdentifier": identifier});
+      }
+    };
+
     double latitude = [marker[@"latitude"] doubleValue];
     double longitude = [marker[@"longitude"] doubleValue];
     double width = [marker[@"width"] doubleValue];
@@ -375,7 +383,8 @@ NMAP_MAP_SETTER(L, l, ocale, NSString*)
                                                  image:image
                                                  width:width
                                                 height:height
-                                                caption:caption];
+                                                caption:caption
+                                                onTapLeafMarker:onTapLeafMarker];
     markerDict[markerKey] = [NSNull null];
 
     [markerIdentifiers addObject:identifier];
