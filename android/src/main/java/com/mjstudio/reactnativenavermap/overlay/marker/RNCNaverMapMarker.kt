@@ -133,6 +133,6 @@ class RNCNaverMapMarker(val reactContext: ThemedReactContext) :
 
   override fun setOverlayImage(image: OverlayImage?) {
     overlay.icon =
-      image ?: OverlayImage.fromBitmap(Bitmap.createBitmap(0, 0, Bitmap.Config.ARGB_8888))
+      image ?: OverlayImage.fromBitmap(Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888))
   }
 }
